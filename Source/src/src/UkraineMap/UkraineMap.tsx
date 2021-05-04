@@ -1,4 +1,3 @@
-import React from "react";
 import Highcharts, { SeriesClickEventObject } from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 

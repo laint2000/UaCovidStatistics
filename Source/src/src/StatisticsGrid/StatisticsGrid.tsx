@@ -1,10 +1,10 @@
 import React from "react";
-import { IDataItem } from "../../Types/AppTypes";
+import { TDayStatistics } from "../../Types/AppTypes";
 import { addDays } from "../../Types/AppUtils";
 
 type TStatisticsGridProps = {
   startDate: Date,
-  data: IDataItem  | undefined;
+  data: TDayStatistics[]  | undefined;
 }
 
 export default function StatisticsGrid({startDate, data}: TStatisticsGridProps){
@@ -13,7 +13,7 @@ export default function StatisticsGrid({startDate, data}: TStatisticsGridProps){
     if (!data) return null;
 
     const result: React.ReactChild[] = [];
-    const max = data.total.length - 1;
+    const max = data.length - 1;
 
 
     for (let i = 0; i <= 300; i++) {
@@ -24,9 +24,9 @@ export default function StatisticsGrid({startDate, data}: TStatisticsGridProps){
       const item = (
         <tr key={i}>
           <td> {timeTitle}</td>
-          <td> {data.sickness[id]}</td>
-          <td> {data.sicknessDiff[id]}</td>
-          <td> {data.sicknessNew[id]}</td>     
+          <td> {data[id].sickness}</td>
+          <td> {data[id].sicknessDiff}</td>
+          <td> {data[id].sicknessNew}</td>     
         </tr>
       );
 

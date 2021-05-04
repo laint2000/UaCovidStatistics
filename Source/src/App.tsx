@@ -1,16 +1,19 @@
+import { off } from 'node:process';
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import ProgressChart from './src/ProgressChart/ProgressChart';
+import Checkbox from './Copmonents/Interface/Checkbox';
+import ProgressChart, { TChartData } from './src/ProgressChart/ProgressChart';
 import StatisticsGrid from './src/StatisticsGrid/StatisticsGrid';
 import UkraineMap from './src/UkraineMap/UkraineMap';
-import { IDataItem, initialStatisticData, IStatisticData } from './Types/AppTypes';
+import { TRegionData, initialStatisticData, IStatisticData } from './Types/AppTypes';
 import { addDays, CreateStatisticData } from './Types/AppUtils';
 
 function App() {
 
   const [data, setData] = useState<IStatisticData>(initialStatisticData);
-  const [selRegionData, setSelRegionData] = useState<IDataItem | undefined>(undefined);
+  const [selRegionData, setSelRegionData] = useState<TRegionData | undefined>(undefined);
   const [chartStartFrom, setChartStartFrom] = useState<number>(0);
+  const [chartUseAvg, setChartUseAvg] = useState<boolean>(false);
 
   useEffect(() => {
     fetch("data/ukraine.json")
@@ -43,7 +46,7 @@ function App() {
     if (!selRegionData) return;
 
     const startFrom = (chartDaysLimit !== 0) 
-      ? selRegionData?.sickness?.length - 1 - chartDaysLimit
+      ? selRegionData?.stats?.length - 1 - chartDaysLimit
       : 0;
 
       setChartStartFrom(startFrom);
@@ -54,12 +57,12 @@ function App() {
     setSelRegionData(regionData);
   }
 
-  const getMapData = (data: IDataItem[]): [string, number][] => {
+  const getMapData = (data: TRegionData[]): [string, number][] => {
     if (!data) return [];
 
     const result = data.map(r => {
-      const lastId = r.sickness.length - 1;
-      const item: [string, number] = [r.mapNameId, r.sickness[lastId]];
+      const lastId = r.stats.length - 1;
+      const item: [string, number] = [r.mapNameId, r.stats[lastId].sickness];
       return item;
     });
     return result;
@@ -68,19 +71,21 @@ function App() {
   const charStartFrom = addDays(data.startDate, chartStartFrom);
 
   const mapData = getMapData(data.data);
-  const chartData= [
+  const chartDataToShow = selRegionData?.stats?.slice(chartStartFrom);
+
+  const chartData: TChartData[]= [
     {
       name: 'Захворіло',
-      data: selRegionData?.sickness?.slice(chartStartFrom) ||  []
+      data: chartDataToShow?.map(r => r.sickness) ||  []
     },  
     {
       name: 'Різниця хворих',
-      data: selRegionData?.sicknessDiff.slice(chartStartFrom) ||  []
+      data: chartDataToShow?.map(r => chartUseAvg ? r.sicknessDiffAvg : r.sicknessDiff) ||  []
     },
     {
       name: 'Нових хворих',
-      data: selRegionData?.sicknessNew.slice(chartStartFrom) ||  []
-    },
+      data: chartDataToShow?.map(r => chartUseAvg ? r.sicknessNewAvg : r.sicknessNew) ||  []
+    }
   ];
 
   return (
@@ -91,6 +96,10 @@ function App() {
       </div>
       <div className="chart-container">
         <ProgressChart title={selRegionData?.name} data={chartData} startFrom={charStartFrom}/>
+        <Checkbox className="chart-checkbx-useAvg"
+            label="Використовувати середні значення (Нових Хворих, Різниця Хворих)"
+            handleCheckboxChange={setChartUseAvg}
+        />
         <div className="chart-limit-container">
           <span className="chart-limit-button"> <a href='#' onClick={(p)=>handleChartLastRecordsClick(p, 0)} > Show All </a> </span>
           <span className="chart-limit-button"> <a href='#' onClick={(p)=>handleChartLastRecordsClick(p, 366)} > Show Last Year </a> </span>
@@ -101,7 +110,7 @@ function App() {
       </div>
       <div className="statistics-grid-container">
         <h2 className="header-selected-region">{selRegionData?.name || ""}</h2>
-        <StatisticsGrid data={selRegionData} startDate={data.startDate} />
+        <StatisticsGrid data={selRegionData?.stats} startDate={data.startDate} />
       </div>
     </div >
   );

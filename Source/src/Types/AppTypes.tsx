@@ -1,18 +1,24 @@
 export interface IStatisticData {
     startDate: Date;
-    data: IDataItem[];
+    data: TRegionData[];
 }
 
-export interface IDataItem {
+export type TRegionData = {
     id: string,
     mapNameId: string,
     name: string,
-    total: number[],
-    death: number[],
-    recovered: number[],
-    sickness: number[];
-    sicknessDiff: number[];
-    sicknessNew: number[];
+    stats: TDayStatistics[],
+}
+
+export type TDayStatistics = {
+    total: number,
+    death: number,
+    recovered: number,
+    sickness: number,
+    sicknessDiff: number,
+    sicknessNew: number,
+    sicknessNewAvg: number,
+    sicknessDiffAvg: number,
 }
 
 

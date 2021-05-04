@@ -1,17 +1,17 @@
+import React from "react";
 import Highcharts, { AxisLabelsFormatterContextObject, SeriesOptionsType } from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import React from "react";
 import { addDays } from "../../Types/AppUtils";
 import { formatDate } from "./ProgressChartUtils";
 
-type TData = {
+export type TChartData = {
     name: string;
     data: (string | number)[];
 }
 
 type ProgressChartProps = {
     title?: string;
-    data: TData[];
+    data: TChartData[];
     startFrom: Date,
 };
 
